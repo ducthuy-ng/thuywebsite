@@ -1,0 +1,4 @@
+[proxy]
+  enabled = true
+  proxy_port = 3001
+  app_port = 3000

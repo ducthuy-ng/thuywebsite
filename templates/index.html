@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{template "shared/head.html" "Main"}}
+    <title>Document</title>
+  </head>
+  <body>
+    <header class="h-72 m-auto flex flex-col items-center justify-center bg-gray-700 text-white gap-3">
+      <h1 class="text-6xl">thuywebsite</h1>
+      <div>Welcome to my personal website 😁</div>
+    </header>
+    <div class="flex flex-col items-center">
+      <div class="p-4 flex flex-col items-start gap-4 max-w-lg">
+        <header class="gap-2">
+          <h1 class="text-3xl">Blogs</h1>
+          <p class="py-2">Stories and things that I would like to share with the outer world</p>
+        </header>
+        <main class="grid grid-rows-10 gap-6">
+          <ul class="p-2">
+            <li class="list-inside list-disc">
+              <a href="/blog/comparing_document_model_and_relational_model" class="cursor-pointer underline">
+                Comparing Document model and Relational model
+              </a>
+            </li>
+          </ul>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
