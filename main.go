@@ -1,33 +1,46 @@
 package main
 
 import (
-	"embed"
-	"net/http"
+	"log/slog"
+	"os"
 
 	"github.com/ducthuy-ng/thuywebsite/controllers"
 	"github.com/ducthuy-ng/thuywebsite/libs"
+	"github.com/ducthuy-ng/webtools"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 )
 
-//go:embed posts/*.md
-var postFS embed.FS
-
-//go:embed templates
-var templateFS embed.FS
-
 func main() {
+	configs := NewConfigs()
+
 	e := echo.New()
 	libs.SetupLogging(e)
 
-	templateRender, err := libs.NewEchoTemplateRender(templateFS)
-	if err != nil {
-		e.Logger.Panicf("failed to load templates: %v", err)
-	}
-	e.Renderer = templateRender
+	// Setup post
+	blogController := controllers.NewBlogController(configs.PostsPath)
+	e.GET("/blog/:id", blogController.GetPost)
 
-	e.GET("/", func(c echo.Context) error { return c.Render(http.StatusOK, "index.html", nil) })
-	e.GET("/blog/:id", func(c echo.Context) error { return controllers.GetPost(c, postFS) })
+	environment := os.Getenv("ENVIRONMENT")
+	if environment == "" {
+		environment = "PRODUCTION"
+	}
+	slog.Default().Info("System initializing", "environment", environment)
+
+	viteConfigs := webtools.NewViteIntegrationConfigs("./ui/dist/").SetIsDevEnvironment(environment == "DEVELOPMENT")
+	err := webtools.ApplyViteIntegration(e, viteConfigs)
+	if err != nil {
+		e.Logger.Panicf("failed to apply Vite integration: %v", err)
+	}
 
 	e.Logger.Fatal(e.Start(":3000"))
+}
+
+type Configs struct {
+	TemplatePath string
+	PostsPath    string
+}
+
+func NewConfigs() Configs {
+	return Configs{TemplatePath: "templates", PostsPath: "posts"}
 }

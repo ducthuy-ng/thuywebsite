@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"embed"
 	"html/template"
+	"io/fs"
 	"net/http"
+	"os"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
@@ -13,13 +14,21 @@ import (
 
 var mdRenderer = html.NewRenderer(html.RendererOptions{Flags: html.CommonFlags | html.HrefTargetBlank})
 
-func GetPost(c echo.Context, postFS embed.FS) error {
+type BlogController struct {
+	postFS fs.FS
+}
+
+func NewBlogController(postPath string) BlogController {
+	return BlogController{postFS: os.DirFS(postPath)}
+}
+
+func (controller *BlogController) GetPost(c echo.Context) error {
 	id := c.Param("id")
 
-	filePath := "posts/" + id + ".md"
-	fileContent, err := postFS.ReadFile(filePath)
+	filePath := id + ".md"
+	fileContent, err := fs.ReadFile(controller.postFS, filePath)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to read post")
 	}
 
 	parser := parser.NewWithExtensions(parser.CommonExtensions | parser.AutoHeadingIDs)

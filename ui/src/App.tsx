@@ -1,162 +1,58 @@
-import { useRef, useState } from "react";
-import { PDFDocument } from "pdf-lib";
-import { Progress } from "./components/ui/progress";
-import { Button } from "./components/ui/button";
-import { Card, CardHeader } from "./components/ui/card";
-
-type UploadedFile = {
-  id: number;
-  file: File;
-};
+import { Link } from "react-router";
+import { Card, CardContent, CardFooter } from "./components/ui/card";
+import { Icon } from "@iconify/react";
 
 function App() {
-  const [isFileDragOver, setFileDragOver] = useState<boolean>(false);
-  const [inputFiles, setInputFiles] = useState<UploadedFile[]>([]);
-  const [draggingItem, setDraggingItem] = useState<null | number>(null);
-
-  const [fileMergedCount, setFileMergedCount] = useState<null | number>(null);
-
-  const addFiles = (files: File[]) => {
-    setInputFiles((prev) => [
-      ...prev,
-      ...files.map<UploadedFile>((file, index) => ({
-        id: prev.length + index,
-        file: file,
-      })),
-    ]);
-  };
-
   return (
-    <div className="relative grid w-screen grid-cols-1 place-items-center">
-      {fileMergedCount && (
-        <div className="absolute top-0 left-0 z-10 flex h-screen w-full items-center justify-center bg-gray-50 p-4 opacity-70">
-          <Progress value={(fileMergedCount / inputFiles.length) * 100} />
+    <div>
+      <header className="m-auto flex h-72 flex-col items-center justify-center gap-3 bg-gray-700 text-white">
+        <h1 className="text-6xl">thuywebsite</h1>
+        <div>Web cá nhân của Thuỵ 😁</div>
+      </header>
+      <div className="flex flex-col items-center">
+        <div className="flex max-w-lg flex-col items-start gap-4 p-4">
+          <header className="gap-2">
+            <h1 className="text-3xl">Công cụ</h1>
+            <p className="py-2">
+              Một số công cụ mà tôi đã phát triển và muốn chia sẻ với mọi người
+            </p>
+          </header>
+          <main className="grid w-full grid-cols-2 gap-6 md:grid-cols-3">
+            <Link to="/pdf-editor">
+              <Card className="flex cursor-pointer flex-col items-center transition-shadow duration-300 hover:shadow-lg">
+                <CardContent>
+                  <Icon
+                    icon="streamline-sharp:edit-pdf-remix"
+                    style={{ fontSize: "3rem" }}
+                  />
+                </CardContent>
+                <CardFooter>
+                  <Link to="/pdf-editor">Gộp file PDF</Link>
+                </CardFooter>
+              </Card>
+            </Link>
+          </main>
         </div>
-      )}
-
-      <div className="flex w-full flex-col content-stretch items-center gap-4 p-4">
-        <h1 className="text-bold text-4xl">Chỉnh sửa file PDF</h1>
-
-        <div>
-          <Button
-            disabled={inputFiles.length === 0}
-            onClick={async () => {
-              setFileMergedCount(0);
-
-              const mergedPdf = await PDFDocument.create();
-              for (const uploadedFile of inputFiles) {
-                const pdf = await PDFDocument.load(
-                  await uploadedFile.file.arrayBuffer(),
-                );
-                const copiedPages = await mergedPdf.copyPages(
-                  pdf,
-                  pdf.getPageIndices(),
-                );
-                copiedPages.forEach((page) => {
-                  mergedPdf.addPage(page);
-                });
-                setFileMergedCount((prev) => (prev ?? 0) + 1);
-              }
-
-              const data = new Blob([await mergedPdf.save()], {
-                type: "application/pdf",
-              });
-              const csvURL = window.URL.createObjectURL(data);
-              const tempLink = document.createElement("a");
-              tempLink.href = csvURL;
-              tempLink.setAttribute("download", "test.pdf");
-              tempLink.click();
-              setFileMergedCount(null);
-            }}
-          >
-            Gộp file
-          </Button>
-        </div>
-
-        <div
-          className={`rounded-sm p-0.5 ${isFileDragOver ? "cursor-pointer border-dashed bg-gray-50" : "border-1"} flex w-full items-center justify-center`}
-          onDragOver={(event) => {
-            event.preventDefault();
-            setFileDragOver(true);
-          }}
-          onDragLeave={(event) => {
-            event.preventDefault();
-            setFileDragOver(false);
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            setFileDragOver(false);
-            addFiles(Array.from(event.dataTransfer.files));
-          }}
-        >
-          {inputFiles.length === 0 ? (
-            <EmptyFileEditor addFiles={addFiles} />
-          ) : (
-            <div className="grid w-full grid-cols-5 gap-2 p-2">
-              {inputFiles.map((uploadedFile, index) => (
-                <Card
-                  key={uploadedFile.id}
-                  id={uploadedFile.id.toString()}
-                  className={`h-48 cursor-move break-all`}
-                  draggable
-                  onDragStart={() => {
-                    setDraggingItem(index);
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDraggingItem(null);
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDragEnter={(e) => {
-                    e.preventDefault();
-                    const target = e.target as HTMLDivElement;
-                    const targetIndex = inputFiles.findIndex(
-                      (f) => f.id.toString() === target.id[0],
-                    );
-
-                    if (draggingItem !== null && draggingItem !== targetIndex) {
-                      const temp = inputFiles[draggingItem];
-                      inputFiles[draggingItem] = inputFiles[targetIndex];
-                      inputFiles[targetIndex] = temp;
-                      setInputFiles(inputFiles);
-                      setDraggingItem(targetIndex);
-                    }
-                  }}
-                >
-                  <CardHeader>{uploadedFile.file.name}</CardHeader>
-                </Card>
-              ))}
-            </div>
-          )}
+        <div className="flex max-w-lg flex-col items-start gap-4 p-4">
+          <header className="gap-2">
+            <h1 className="text-3xl">Blogs</h1>
+            <p className="py-2">
+              Stories and things that I would like to share with the outer world
+            </p>
+          </header>
+          <main className="grid grid-cols-1 gap-6">
+            <ul className="p-2">
+              <li className="cursor-pointer list-inside list-disc hover:text-blue-500">
+                <Link to="/blog/comparing_document_model_and_relational_model">
+                  Comparing Document model and Relational model
+                </Link>
+              </li>
+            </ul>
+          </main>
         </div>
       </div>
     </div>
   );
 }
-
-const EmptyFileEditor = (props: { addFiles: (files: File[]) => void }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  return (
-    <div
-      className="flex h-36 w-full cursor-pointer items-center justify-center text-center hover:bg-gray-50"
-      onClick={() => {
-        fileInputRef.current?.click();
-      }}
-    >
-      Drop your files here
-      <input
-        type="file"
-        id="file"
-        accept="application/pdf"
-        multiple
-        ref={fileInputRef}
-        onChange={() => {
-          props.addFiles(Array.from(fileInputRef.current?.files ?? []));
-        }}
-        className="hidden"
-      />
-    </div>
-  );
-};
 
 export default App;
