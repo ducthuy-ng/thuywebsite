@@ -1,7 +1,6 @@
 import { CSS } from "@dnd-kit/utilities";
 import { PDFDocument } from "pdf-lib";
 import { useRef, useState } from "react";
-import { pdfjs } from "react-pdf";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardTitle } from "./components/ui/card";
 import { Progress } from "./components/ui/progress";
@@ -23,11 +22,6 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
 
 type UploadedFileId = number;
 type UploadedFile = {
