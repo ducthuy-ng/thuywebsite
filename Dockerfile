@@ -17,10 +17,25 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags="-w -s
 
 
 # ============================================================
-FROM scratch
+FROM oven/bun:1 AS frontend-builder
+
+# Set destination for COPY
+WORKDIR /app
+
+COPY ui/package.json ui/bun.lock ./
+RUN bun install --frozen-lockfile
+
+COPY ui/ ./
+RUN bun run build
+
+
+# ============================================================
+FROM alpine:3.22
 
 WORKDIR /app/
 COPY --from=builder /app/main /app/main
+COPY --from=frontend-builder /app/dist ui/dist
+COPY posts/ posts/
 
 EXPOSE 3000
 
